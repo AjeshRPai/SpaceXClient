@@ -1,7 +1,6 @@
 package com.android.spacexclient.domain
 
 import com.android.spacexclient.RocketRepository
-import com.android.spacexclient.database.LocalRocketModel
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
@@ -14,7 +13,7 @@ class GetRocketsUseCase @Inject constructor(
     }
 }
 
-class GetActiveRocketsUseCase(
+class GetActiveRocketsUseCase @Inject constructor(
     private val repository: RocketRepository,
 ) {
     fun getActiveRockets(): Observable<Result<List<RocketModel>>> {
@@ -22,7 +21,7 @@ class GetActiveRocketsUseCase(
     }
 }
 
-class RefreshRocketsUseCase(
+class RefreshRocketsUseCase @Inject constructor(
     private val repository: RocketRepository,
 ){
     fun refreshRocketEntries(): Observable<Result<List<RocketModel>>> {

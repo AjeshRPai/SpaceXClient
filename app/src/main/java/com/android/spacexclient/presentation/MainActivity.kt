@@ -3,15 +3,12 @@ package com.android.spacexclient.presentation
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
-import android.widget.Switch
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.spacexclient.R
-import com.android.spacexclient.RocketAdapter
 import com.android.spacexclient.SpaceXClientApplication
 import com.android.spacexclient.databinding.ActivityMainBinding
 import com.android.spacexclient.domain.GetActiveRocketsUseCase
@@ -69,6 +66,7 @@ class MainActivity : AppCompatActivity() {
                 when (it) {
                     is UIState.Error -> showRefreshingError(it.message)
                     is UIState.Loading -> showRefreshing(it.message)
+                    is UIState.Success -> hideRefreshing()
                 }
             }
         }
@@ -78,6 +76,11 @@ class MainActivity : AppCompatActivity() {
         setUpRefreshListener()
         viewModel.getRockets()
     }
+
+    private fun hideRefreshing() {
+        binding.refreshRockets.isRefreshing = false
+    }
+
 
     private fun setUpList() {
         binding.rocketList.adapter = adapter

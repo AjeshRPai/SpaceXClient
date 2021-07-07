@@ -6,7 +6,6 @@ import com.android.spacexclient.database.RocketDao
 import com.android.spacexclient.database.convertToDbModel
 import com.android.spacexclient.domain.DomainMapper
 import com.android.spacexclient.domain.RocketModel
-import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject

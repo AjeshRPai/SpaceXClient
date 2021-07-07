@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.spacexclient.database.LocalRocketModel
 import com.android.spacexclient.database.RocketDao
 import com.android.spacexclient.database.SpaceXDatabase
+import com.android.spacexclient.domain.RocketModel
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -42,7 +43,9 @@ class RoomTest {
 
     @Test
     fun shouldNotContainAnyEntries() {
-        dao.getRockets().test().assertNoValues()
+        dao.getRockets()
+            .test()
+            .assertValue { it.equals(emptyList<RocketModel>()) }
     }
 
 
@@ -79,7 +82,8 @@ class RoomTest {
         dao.deleteAll()
             .blockingAwait()
 
-        dao.getRockets().test().assertNoValues()
+        dao.getRockets().test()
+            .assertValue { it.equals(emptyList<RocketModel>()) }
     }
 
     @Test

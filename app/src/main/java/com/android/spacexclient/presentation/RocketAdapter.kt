@@ -1,15 +1,14 @@
-package com.android.spacexclient
+package com.android.spacexclient.presentation
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.NonNull
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.android.spacexclient.R
 import com.android.spacexclient.databinding.RocketListItemBinding
 import com.android.spacexclient.domain.RocketModel
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 class RocketAdapter() : ListAdapter<RocketModel, RocketViewHolder>(DiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RocketViewHolder {

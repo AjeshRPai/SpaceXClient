@@ -7,11 +7,8 @@ import com.android.spacexclient.domain.GetActiveRocketsUseCase
 import com.android.spacexclient.domain.GetRocketsUseCase
 import com.android.spacexclient.domain.RefreshRocketsUseCase
 import com.android.spacexclient.domain.RocketModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 class RocketListingViewModel @Inject constructor(
@@ -86,9 +83,10 @@ class RocketListingViewModel @Inject constructor(
     }
 
     private fun handleRefreshSuccess(it: Result<List<RocketModel>>) {
+        Timber.e("handleRefresh Success "+it.toString())
         if (it.isSuccess)
         {
-            clearRefreshState()
+            refreshRockets.postValue(UIState.Success(listOf()))
             listOfRockets.postValue(UIState.Success(it.getOrDefault(listOf())))
         }
         else
@@ -105,16 +103,3 @@ class RocketListingViewModel @Inject constructor(
 
 }
 
-
-
-
-
-fun <T> Observable<T>.applySchedulers(): Observable<T> {
-    return this.subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-}
-
-fun <T> Single<T>.applySchedulers(): Single<T> {
-    return this.subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-}
