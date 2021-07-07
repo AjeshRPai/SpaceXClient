@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SpaceXClient</string>
+    <string name="welcome_messages">Hello how are you, Lets go to Mars</string>
+    <string name="engine_count">No of engines = %1$d </string>
+</resources>
