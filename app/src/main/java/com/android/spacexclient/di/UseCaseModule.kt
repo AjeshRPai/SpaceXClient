@@ -1,10 +1,9 @@
 package com.android.spacexclient.di
 
 import com.android.spacexclient.RocketRepository
-import com.android.spacexclient.domain.GetActiveRocketsUseCase
-import com.android.spacexclient.domain.GetRocketsUseCase
-import com.android.spacexclient.domain.Mapper
-import com.android.spacexclient.domain.RefreshRocketsUseCase
+import com.android.spacexclient.domain.GetActiveRocketsUseCaseImpl
+import com.android.spacexclient.domain.GetRocketsUseCaseImpl
+import com.android.spacexclient.domain.RefreshRocketsUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -14,19 +13,19 @@ class UseCaseModule {
 
     @Provides
     @Singleton
-    fun getRocketsUseCase(repository: RocketRepository):GetRocketsUseCase {
-        return GetRocketsUseCase(repository)
+    fun getRocketsUseCase(repository: RocketRepository):GetRocketsUseCaseImpl {
+        return GetRocketsUseCaseImpl(repository)
     }
 
     @Provides
     @Singleton
-    fun getActiveRocketsUseCase(repository: RocketRepository): GetActiveRocketsUseCase {
-        return GetActiveRocketsUseCase(repository)
+    fun getActiveRocketsUseCase(repository: RocketRepository): GetActiveRocketsUseCaseImpl {
+        return GetActiveRocketsUseCaseImpl(repository)
     }
 
     @Provides
     @Singleton
-    fun getRefreshRocketsUseCase(repository: RocketRepository): RefreshRocketsUseCase {
-        return RefreshRocketsUseCase(repository)
+    fun getRefreshRocketsUseCase(repository: RocketRepository): RefreshRocketsUseCaseImpl {
+        return RefreshRocketsUseCaseImpl(repository)
     }
 }

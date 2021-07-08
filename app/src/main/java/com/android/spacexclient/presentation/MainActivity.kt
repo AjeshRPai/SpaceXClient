@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.spacexclient.R
 import com.android.spacexclient.SpaceXClientApplication
 import com.android.spacexclient.databinding.ActivityMainBinding
-import com.android.spacexclient.domain.GetActiveRocketsUseCase
-import com.android.spacexclient.domain.GetRocketsUseCase
-import com.android.spacexclient.domain.RefreshRocketsUseCase
+import com.android.spacexclient.domain.GetActiveRocketsUseCaseImpl
+import com.android.spacexclient.domain.GetRocketsUseCaseImpl
+import com.android.spacexclient.domain.RefreshRocketsUseCaseImpl
 import com.android.spacexclient.domain.RocketModel
 import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
@@ -28,13 +28,13 @@ class MainActivity : AppCompatActivity() {
     private val adapter = RocketAdapter()
 
     @Inject
-    lateinit var getRocketsUseCase: GetRocketsUseCase
+    lateinit var getRocketsUseCase: GetRocketsUseCaseImpl
 
     @Inject
-    lateinit var getActiveRocketsUseCase: GetActiveRocketsUseCase
+    lateinit var getActiveRocketsUseCaseImpl: GetActiveRocketsUseCaseImpl
 
     @Inject
-    lateinit var refreshRocketsUseCase: RefreshRocketsUseCase
+    lateinit var refreshRocketsUseCaseImpl: RefreshRocketsUseCaseImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,8 +47,8 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = RocketListingViewModel(
             getRocketsUseCase,
-            getActiveRocketsUseCase,
-            refreshRocketsUseCase
+            getActiveRocketsUseCaseImpl,
+            refreshRocketsUseCaseImpl
         )
 
         viewModel.getAllRockets().observe(this) {
