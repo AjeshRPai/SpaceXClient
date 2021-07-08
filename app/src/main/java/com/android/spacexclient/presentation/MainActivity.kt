@@ -36,6 +36,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var refreshRocketsUseCaseImpl: RefreshRocketsUseCaseImpl
 
+    @Inject
+    lateinit var schedulerProvider: SchedulerProvider
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -48,7 +51,8 @@ class MainActivity : AppCompatActivity() {
         viewModel = RocketListingViewModel(
             getRocketsUseCase,
             getActiveRocketsUseCaseImpl,
-            refreshRocketsUseCaseImpl
+            refreshRocketsUseCaseImpl,
+            schedulerProvider
         )
 
         viewModel.getAllRockets().observe(this) {
@@ -56,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                 when (it) {
                     is UIState.Success -> showData(it.list)
                     is UIState.Error -> showError(it.message)
-                    is UIState.Loading -> showLoading(it.message)
+                    is UIState.Loading -> showLoading()
                 }
             }
         }
@@ -65,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             it?.let {
                 when (it) {
                     is UIState.Error -> showRefreshingError(it.message)
-                    is UIState.Loading -> showRefreshing(it.message)
+                    is UIState.Loading -> showRefreshing()
                     is UIState.Success -> hideRefreshing()
                 }
             }
@@ -93,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showRefreshing(message: String?) {
+    private fun showRefreshing() {
         binding.refreshRockets.isRefreshing = true
     }
 
@@ -107,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.clearRefreshState()
     }
 
-    private fun showLoading(message: String?) {
+    private fun showLoading() {
         binding.refreshRockets.isGone = true
 
         binding.progressBar.isVisible = true

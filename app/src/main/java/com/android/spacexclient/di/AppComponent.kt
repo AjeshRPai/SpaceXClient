@@ -8,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 @Component(
-    modules = [UseCaseModule::class]
+    modules = [UseCaseModule::class,SchedulerModule::class]
 )
 interface AppComponent
 {

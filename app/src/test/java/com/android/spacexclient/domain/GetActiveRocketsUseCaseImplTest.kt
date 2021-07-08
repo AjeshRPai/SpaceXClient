@@ -16,10 +16,7 @@ class GetActiveRocketsUseCaseImplTest {
 
     @Test
     fun `invoke should return repository result success`() {
-        val images = listOf("Image1", "image2")
-        val model = RocketModel(id = "1234", "Spacex", "US", true, images, 1)
-        val models = listOf(model)
-
+        val models = listOf(RocketModel(id = "1234", "Spacex", "US", true, listOf("Image1", "image2"), 1))
         val success = Result.success(models)
 
         whenever(repository.getActiveRockets()).thenReturn(Observable.just(success))

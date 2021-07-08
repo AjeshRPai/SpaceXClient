@@ -8,12 +8,11 @@ import com.android.spacexclient.database.LocalRocketModel
 import com.android.spacexclient.database.RocketDao
 import com.android.spacexclient.database.convertToDbModel
 import com.android.spacexclient.domain.Mapper
+import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
 import java.util.concurrent.TimeUnit
@@ -22,21 +21,13 @@ import java.util.concurrent.TimeUnit
 @RunWith(MockitoJUnitRunner::class)
 class RocketRepositoryTest {
 
-    lateinit var rocketRepository: RocketRepository
+    val rocketDao: RocketDao = mock()
 
-    @Mock
-    lateinit var rocketDao: RocketDao
+    val rocketApi: RocketApi = mock()
 
-    @Mock
-    lateinit var rocketApi: RocketApi
+    val mapper: Mapper = mock()
 
-    @Mock
-    lateinit var mapper: Mapper
-
-    @Before
-    fun setUp() {
-        rocketRepository = RocketRepository(rocketDao, rocketApi, mapper)
-    }
+    private val rocketRepository = RocketRepository(rocketDao, rocketApi, mapper)
 
     @Test
     fun `if network is available and insertion is successful then should return movies`() {

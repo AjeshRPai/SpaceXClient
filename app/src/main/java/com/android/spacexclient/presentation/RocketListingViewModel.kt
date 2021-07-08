@@ -1,6 +1,5 @@
 package com.android.spacexclient.presentation
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.spacexclient.domain.GetActiveRocketsUseCaseImpl
@@ -8,19 +7,21 @@ import com.android.spacexclient.domain.GetRocketsUseCaseImpl
 import com.android.spacexclient.domain.RefreshRocketsUseCaseImpl
 import com.android.spacexclient.domain.RocketModel
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import timber.log.Timber
 import javax.inject.Inject
 
 class RocketListingViewModel @Inject constructor(
-    val getRocketsUseCase: GetRocketsUseCaseImpl,
+    val getRocketsUseCaseImpl: GetRocketsUseCaseImpl,
     val getActiveRocketsUseCaseImpl: GetActiveRocketsUseCaseImpl,
     val refreshRocketsUseCaseImpl: RefreshRocketsUseCaseImpl,
+    val schedulers:SchedulerProvider
 ) : ViewModel() {
 
     private val listOfRockets = MutableLiveData<UIState<List<RocketModel>>>()
 
     private val refreshRockets = MutableLiveData<UIState<List<RocketModel>>?>()
 
-    fun getAllRockets(): LiveData<UIState<List<RocketModel>>> {
+    fun getAllRockets(): MutableLiveData<UIState<List<RocketModel>>> {
         return listOfRockets
     }
 
@@ -31,9 +32,10 @@ class RocketListingViewModel @Inject constructor(
     private val compositeDisposable = CompositeDisposable()
 
     fun getRockets() {
-        listOfRockets.postValue(UIState.Loading())
-        val disposable = getRocketsUseCase()
-            .applySchedulers()
+        listOfRockets.postValue(UIState.Loading)
+        val disposable = getRocketsUseCaseImpl()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
             .subscribe(
                 { handleSuccess(it) },
                 { handleFailure(it) }
@@ -42,20 +44,23 @@ class RocketListingViewModel @Inject constructor(
     }
 
     private fun handleSuccess(it: Result<List<RocketModel>>) {
+        Timber.i(it.toString())
         if (it.isSuccess)
             listOfRockets.postValue(UIState.Success(it.getOrDefault(listOf())))
         else
-            listOfRockets.postValue(UIState.Error(it.toString()))
+            listOfRockets.postValue(UIState.Error(it.exceptionOrNull()?.message?:""))
     }
 
     private fun handleFailure(it: Throwable) {
+        Timber.i(it)
         listOfRockets.postValue(UIState.Error(it.message!!))
     }
 
     fun getActiveRockets() {
-        listOfRockets.postValue(UIState.Loading())
+        listOfRockets.postValue(UIState.Loading)
         val disposable = getActiveRocketsUseCaseImpl()
-            .applySchedulers()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
             .subscribe(
                 { handleSuccess(it) },
                 { handleFailure(it) }
@@ -64,9 +69,10 @@ class RocketListingViewModel @Inject constructor(
     }
 
     fun refreshRocketList() {
-        refreshRockets.postValue(UIState.Loading())
+        refreshRockets.postValue(UIState.Loading)
         val disposable = refreshRocketsUseCaseImpl()
-            .applySchedulers()
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
             .subscribe(
                 { handleRefreshSuccess(it) },
                 { handleRefreshFailure(it) }
