@@ -6,6 +6,8 @@ import com.android.spacexclient.domain.GetActiveRocketsUseCaseImpl
 import com.android.spacexclient.domain.GetRocketsUseCaseImpl
 import com.android.spacexclient.domain.RefreshRocketsUseCaseImpl
 import com.android.spacexclient.domain.RocketModel
+import com.android.spacexclient.presentation.utils.SchedulerProvider
+import com.android.spacexclient.presentation.utils.UIState
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
 import javax.inject.Inject
@@ -14,7 +16,7 @@ class RocketListingViewModel @Inject constructor(
     val getRocketsUseCaseImpl: GetRocketsUseCaseImpl,
     val getActiveRocketsUseCaseImpl: GetActiveRocketsUseCaseImpl,
     val refreshRocketsUseCaseImpl: RefreshRocketsUseCaseImpl,
-    val schedulers:SchedulerProvider
+    val schedulers: SchedulerProvider
 ) : ViewModel() {
 
     private val listOfRockets = MutableLiveData<UIState<List<RocketModel>>>()
@@ -32,6 +34,7 @@ class RocketListingViewModel @Inject constructor(
     private val compositeDisposable = CompositeDisposable()
 
     fun getRockets() {
+        Timber.i("Get rockets called")
         listOfRockets.postValue(UIState.Loading)
         val disposable = getRocketsUseCaseImpl()
             .subscribeOn(schedulers.io())
@@ -44,7 +47,7 @@ class RocketListingViewModel @Inject constructor(
     }
 
     private fun handleSuccess(it: Result<List<RocketModel>>) {
-        Timber.i(it.toString())
+        Timber.i("handle success $it")
         if (it.isSuccess)
             listOfRockets.postValue(UIState.Success(it.getOrDefault(listOf())))
         else
@@ -52,7 +55,7 @@ class RocketListingViewModel @Inject constructor(
     }
 
     private fun handleFailure(it: Throwable) {
-        Timber.i(it)
+        Timber.i("handle Failure Called $it")
         listOfRockets.postValue(UIState.Error(it.message!!))
     }
 

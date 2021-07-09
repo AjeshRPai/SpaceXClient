@@ -1,7 +1,7 @@
 package com.android.spacexclient.di
 
-import com.android.spacexclient.presentation.AppSchedulerProvider
-import com.android.spacexclient.presentation.SchedulerProvider
+import com.android.spacexclient.presentation.utils.AppSchedulerProvider
+import com.android.spacexclient.presentation.utils.SchedulerProvider
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

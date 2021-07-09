@@ -1,6 +1,5 @@
 package com.android.spacexclient.di
 
-import com.android.spacexclient.BuildConfig
 import com.android.spacexclient.api.RocketApi
 import dagger.Module
 import dagger.Provides
@@ -16,18 +15,13 @@ class RetrofitModule {
 
     @Singleton
     @Provides
-    fun provideOkHttpClient() =
-        if (BuildConfig.DEBUG) {
-            val httpLoggingInterceptor = HttpLoggingInterceptor()
-            httpLoggingInterceptor.apply { HttpLoggingInterceptor.Level.BODY }
-            OkHttpClient.Builder()
-                .addInterceptor(httpLoggingInterceptor)
-                .build()
-        } else {
-            OkHttpClient
-                .Builder()
-                .build()
-        }
+    fun provideOkHttpClient(): OkHttpClient {
+        val httpLoggingInterceptor = HttpLoggingInterceptor()
+        httpLoggingInterceptor.apply { HttpLoggingInterceptor.Level.BASIC }
+        return OkHttpClient.Builder()
+            .addInterceptor(httpLoggingInterceptor)
+            .build()
+    }
 
     @Singleton
     @Provides

@@ -8,7 +8,6 @@ import com.android.spacexclient.database.LocalRocketModel
 import com.android.spacexclient.database.RocketDao
 import com.android.spacexclient.database.convertToDbModel
 import com.android.spacexclient.domain.Mapper
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable

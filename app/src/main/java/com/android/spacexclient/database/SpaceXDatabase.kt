@@ -4,7 +4,6 @@ import androidx.room.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 
-
 @Entity(tableName = "rockets")
 data class LocalRocketModel(
     @PrimaryKey @ColumnInfo(name = "id")
@@ -32,14 +31,14 @@ interface RocketDao {
     fun getActiveRockets(): Observable<List<LocalRocketModel>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(movies: List<LocalRocketModel>): Completable
+    fun insertAll(rockets: List<LocalRocketModel>): Completable
 
     @Query("DELETE FROm rockets")
     fun deleteAll(): Completable
 }
 
 
-@Database(entities = [LocalRocketModel::class], version = 1, exportSchema = false)
+@Database(entities = [LocalRocketModel::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class SpaceXDatabase : RoomDatabase() {
     abstract fun rocketDao(): RocketDao

@@ -1,4 +1,4 @@
-package com.android.spacexclient.presentation
+package com.android.spacexclient.presentation.utils
 
 sealed class UIState<out R> {
     data class Success<R>(val data: R) : UIState<R>()
