@@ -51,9 +51,7 @@ class RoomTest {
 
     @Test
     fun writeAndGet() {
-        val images = listOf("Image1", "image2")
-        val model = LocalRocketModel(id = "1234", "Spacex", "US", true, images, 1)
-        val dbEntries = listOf(model)
+        val dbEntries = getActiveRockets()+getInactiveRockets()
 
         dao.insertAll(dbEntries)
             .blockingAwait()
@@ -72,31 +70,25 @@ class RoomTest {
 
     @Test
     fun shouldNotContainAnyEntriesAfterDeletion() {
-        val images = listOf("Image1", "image2")
-        val model = LocalRocketModel(id = "1234", "Spacex", "US", true, images, 1)
-        val dbEntries = listOf(model)
+        val dbEntries = getActiveRockets()+getInactiveRockets()
 
+        // given
         dao.insertAll(dbEntries)
             .blockingAwait()
 
+        //when
         dao.deleteAll()
             .blockingAwait()
 
+        //then
         dao.getRockets().test()
             .assertValue { it.equals(emptyList<RocketModel>()) }
     }
 
     @Test
     fun shouldFetchOnlyActiveRockets() {
-        val images = listOf("Image1", "image2")
 
-        val active = LocalRocketModel(id = "1234", "Spacex", "US", true, images, 1)
-        val activeRockets = listOf(active)
-
-        val inActive = LocalRocketModel(id = "1233", "Spacex3", "US", false, images, 1)
-        val inactiveRockets = listOf(inActive)
-
-        val dbEntries = activeRockets+inactiveRockets
+        val dbEntries = getActiveRockets()+getInactiveRockets()
 
         dao.insertAll(dbEntries)
             .blockingAwait()
@@ -105,11 +97,23 @@ class RoomTest {
             .test()
             .assertValueCount(1)
             .assertValue {
-                it == activeRockets
+                it == getActiveRockets()
             }
 
         dao.deleteAll().blockingAwait()
 
+    }
+
+    private fun getInactiveRockets(): List<LocalRocketModel> {
+        val images = listOf("Image1", "image2")
+        val inActive = LocalRocketModel(id = "1233", "Spacex3", "US", false, images, 1)
+        return listOf(inActive)
+    }
+
+    private fun getActiveRockets(): List<LocalRocketModel> {
+        val images = listOf("Image1", "image2")
+        val active = LocalRocketModel(id = "1234", "Spacex", "US", true, images, 1)
+        return listOf(active)
     }
 
 

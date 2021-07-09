@@ -8,7 +8,7 @@ import com.android.spacexclient.domain.RocketModel
 import com.jraska.livedata.TestObserver
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.TestScheduler
 import org.junit.Before
 import org.junit.Rule
@@ -37,7 +37,7 @@ class RocketListingViewModelTest {
 
     @Test
     fun testListOfRockets() {
-        whenever(getRocketsUseCase()).thenReturn(Single.never())
+        whenever(getRocketsUseCase()).thenReturn(Observable.empty())
 
         sut.getRockets()
         testSchedulerProvider.triggerActions()
@@ -48,7 +48,7 @@ class RocketListingViewModelTest {
     @Test
     fun `loadTransactions should show content state when transactions are retrieved`() {
         val models = listOf(RocketModel(id = "1234", "Spacex", "US", true, listOf("Image1", "image2"), 1))
-        whenever(getRocketsUseCase()).thenReturn(Single.just(Result.success(models)))
+        whenever(getRocketsUseCase()).thenReturn(Observable.just(Result.success(models)))
 
         sut.getRockets()
         testSchedulerProvider.triggerActions()
@@ -61,7 +61,7 @@ class RocketListingViewModelTest {
         val error_message = "Some Error"
         val failure = Result.failure<List<RocketModel>>(Throwable(error_message))
 
-        whenever(getRocketsUseCase()).thenReturn(Single.just(failure))
+        whenever(getRocketsUseCase()).thenReturn(Observable.just(failure))
 
         sut.getRockets()
         testSchedulerProvider.triggerActions()

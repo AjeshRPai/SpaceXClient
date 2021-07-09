@@ -8,6 +8,7 @@ import com.android.spacexclient.database.LocalRocketModel
 import com.android.spacexclient.database.RocketDao
 import com.android.spacexclient.database.convertToDbModel
 import com.android.spacexclient.domain.Mapper
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
@@ -15,17 +16,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
-import java.util.concurrent.TimeUnit
 
 
 @RunWith(MockitoJUnitRunner::class)
 class RocketRepositoryTest {
 
-    val rocketDao: RocketDao = mock()
+    private val rocketDao: RocketDao = mock()
 
-    val rocketApi: RocketApi = mock()
+    private val rocketApi: RocketApi = mock()
 
-    val mapper: Mapper = mock()
+    private val mapper: Mapper = mock()
 
     private val rocketRepository = RocketRepository(rocketDao, rocketApi, mapper)
 
@@ -90,58 +90,88 @@ class RocketRepositoryTest {
             .getRockets()
             .test()
             .assertValueCount(1)
-            .assertValue {
+            .assertValue{
                 it == expectedResponse
             }
-            .assertComplete()
+
 
     }
 
     @Test
     fun `should refresh with updated items from network`() {
 
-        val images = listOf<String>()
-        val model = LocalRocketModel(id = "1234", "Spacex", "US", true, images, 1)
-
-        val dbEntries = arrayListOf(model)
+        val dbEntries = getAlreadyPresentDbEntries()
         val domainModels = Mapper.map(dbEntries)
 
         // new details
-        val engines = Engines(1)
-        val images2 = listOf("Image1Url", "Image2Url")
-        val rocket1 = NetworkRocketModel(false, "US", engines, images2, "1234", "Spacex")
-        val rocket2 = NetworkRocketModel(false, "US", engines, images2, "1233", "Spacex")
+        val apiResponse = getUpdatedApiResponse()
 
-        val apiResponse = listOf(rocket1,rocket2)
         val dbEntries2 = convertToDbModel(apiResponse)
         val domainModels2 = mapper.map(dbEntries2)
 
         Mockito.`when`(rocketDao.getRockets())
-            .thenReturn(Observable.empty())
+            .thenReturn(Observable.just(dbEntries))
+
+        Mockito.`when`(mapper.map(dbEntries))
+            .thenReturn(domainModels)
+
+        val expectedResponse = Result.success(listOf(domainModels))
 
         Mockito.`when`(rocketApi.getRockets())
-            .thenReturn(Observable.just(apiResponse).delay(500,TimeUnit.MILLISECONDS))
+            .thenReturn(Observable.just(apiResponse))
 
-        Mockito.`when`(rocketDao.insertAll(dbEntries2))
-            .thenReturn(Completable.complete())
+        rocketRepository
+            .getRockets()
+            .test().assertValue {
+                print(it)
+                it.equals(expectedResponse)
+            }
+
 
         Mockito.`when`(rocketDao.getRockets())
-            .thenReturn(Observable.just(dbEntries2).delay(500, TimeUnit.MILLISECONDS))
+            .thenReturn(Observable.just(dbEntries2))
 
         Mockito.`when`(mapper.map(dbEntries2))
             .thenReturn(domainModels2)
 
-        val expectedResponse = Result.success(domainModels)
+
+        val expectedResponse2 = Result.success(listOf(domainModels2))
 
         // when
         rocketRepository
             .getRockets()
             .test()
-            .assertValue {
+            .assertValueAt(0)
+            {
                 print(it)
-                it.isSuccess
+                it.equals(expectedResponse)
+            }.assertValueAt(1)
+            {
+                print(it)
+                it.equals(expectedResponse2)
             }
 
+    }
+
+    private fun getAlreadyPresentDbEntries(): ArrayList<LocalRocketModel> {
+        val images = listOf<String>()
+        val model = LocalRocketModel(id = "1", "Spacex", "US", true, images, 1)
+        val model2 = LocalRocketModel(id = "2", "Spacex", "US", true, images, 1)
+
+        val dbEntries = arrayListOf(model, model2)
+        return dbEntries
+    }
+
+    private fun getUpdatedApiResponse(): List<NetworkRocketModel> {
+        val engines = Engines(1)
+        val images2 = listOf("Image1Url", "Image2Url")
+        val rocket1 = NetworkRocketModel(false, "US", engines, images2, "1", "Spacex")
+        val rocket2 = NetworkRocketModel(false, "US", engines, images2, "2", "Spacex")
+        val rocket3 = NetworkRocketModel(false, "US", engines, images2, "3", "Spacex")
+        val rocket4 = NetworkRocketModel(false, "US", engines, images2, "4", "Spacex")
+
+        val apiResponse = listOf(rocket1, rocket2, rocket3, rocket4)
+        return apiResponse
     }
 
 }

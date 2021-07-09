@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.getAllRockets().observe(this) {
             it?.let {
                 when (it) {
-                    is UIState.Success -> showData(it.list)
+                    is UIState.Success -> showData(it.data)
                     is UIState.Error -> showError(it.message)
                     is UIState.Loading -> showLoading()
                 }
