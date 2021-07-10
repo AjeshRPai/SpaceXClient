@@ -1,41 +1,31 @@
 package com.android.spacexclient.domain
 
 import com.android.spacexclient.RocketRepository
-import io.reactivex.rxjava3.core.Observable
+import com.android.spacexclient.presentation.utils.Query
+import io.reactivex.Single
 import javax.inject.Inject
 
 interface GetRocketsUseCase {
-    operator fun invoke(): Observable<Result<List<RocketModel>>>
+    operator fun invoke(query: Query): Single<Result<List<RocketModel>>>
 }
 
 class GetRocketsUseCaseImpl @Inject constructor(
     private val repository: RocketRepository
 ):GetRocketsUseCase {
-    override fun invoke(): Observable<Result<List<RocketModel>>> {
-        return repository.getRockets()
+    override fun invoke(query: Query): Single<Result<List<RocketModel>>> {
+        return repository.getRockets(query)
     }
 }
 
-interface GetActiveRocketsUseCase {
-    operator fun invoke(): Observable<Result<List<RocketModel>>>
-}
-
-class GetActiveRocketsUseCaseImpl @Inject constructor(
-    private val repository: RocketRepository,
-):GetActiveRocketsUseCase {
-    override fun invoke(): Observable<Result<List<RocketModel>>> {
-        return repository.getActiveRockets()
-    }
-}
 
 interface RefreshRocketsUseCase {
-    operator fun invoke(): Observable<Result<List<RocketModel>>>
+    operator fun invoke(): Single<Result<List<RocketModel>>>
 }
 
 class RefreshRocketsUseCaseImpl @Inject constructor(
     private val repository: RocketRepository,
 ):RefreshRocketsUseCase{
-    override fun invoke(): Observable<Result<List<RocketModel>>> {
+    override fun invoke(): Single<Result<List<RocketModel>>> {
         return repository.refreshRockets()
     }
 }

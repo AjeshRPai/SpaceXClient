@@ -1,7 +1,6 @@
 package com.android.spacexclient.di
 
 import com.android.spacexclient.RocketRepository
-import com.android.spacexclient.domain.GetActiveRocketsUseCaseImpl
 import com.android.spacexclient.domain.GetRocketsUseCaseImpl
 import com.android.spacexclient.domain.RefreshRocketsUseCaseImpl
 import dagger.Module
@@ -15,12 +14,6 @@ class UseCaseModule {
     @Singleton
     fun getRocketsUseCase(repository: RocketRepository):GetRocketsUseCaseImpl {
         return GetRocketsUseCaseImpl(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun getActiveRocketsUseCase(repository: RocketRepository): GetActiveRocketsUseCaseImpl {
-        return GetActiveRocketsUseCaseImpl(repository)
     }
 
     @Provides

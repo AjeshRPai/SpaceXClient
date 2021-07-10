@@ -1,44 +1,27 @@
 package com.android.spacexclient.database
 
 import androidx.room.*
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
-
-@Entity(tableName = "rockets")
-data class LocalRocketModel(
-    @PrimaryKey @ColumnInfo(name = "id")
-    val id: String,
-    @ColumnInfo(name = "name")
-    val name: String,
-    @ColumnInfo(name = "country")
-    val country: String,
-    @ColumnInfo(name = "active")
-    val active: Boolean,
-    @ColumnInfo(name = "images")
-    val flickrImages: List<String>,
-    @ColumnInfo(name = "engines")
-    val engines: Int
-)
-
+import io.reactivex.Observable
+import io.reactivex.Single
 
 @Dao
 interface RocketDao {
 
     @Query("SELECT * FROM rockets")
-    fun getRockets(): Observable<List<LocalRocketModel>>
+    fun getRockets(): Single<List<LocalRocketModel>>
 
     @Query("SELECT * FROM rockets where active = 1")
-    fun getActiveRockets(): Observable<List<LocalRocketModel>>
+    fun getActiveRockets(): List<LocalRocketModel>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(rockets: List<LocalRocketModel>): Completable
+    fun insertAll(rockets: List<LocalRocketModel>):List<Long>
 
     @Query("DELETE FROm rockets")
-    fun deleteAll(): Completable
+    fun deleteAll()
 }
 
 
-@Database(entities = [LocalRocketModel::class], version = 3, exportSchema = false)
+@Database(entities = [LocalRocketModel::class], version = 4, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class SpaceXDatabase : RoomDatabase() {
     abstract fun rocketDao(): RocketDao

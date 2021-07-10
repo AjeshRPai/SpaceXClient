@@ -7,5 +7,6 @@ data class RocketModel(
     val country: String,
     val active: Boolean,
     val flickrImages: List<String>,
-    val engines: Int
+    val engines: Int,
+    val year:String
 )

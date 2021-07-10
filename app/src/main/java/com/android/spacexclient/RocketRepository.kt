@@ -1,57 +1,60 @@
 package com.android.spacexclient
 
+import com.android.spacexclient.api.NetworkRocketModel
 import com.android.spacexclient.api.RocketApi
 import com.android.spacexclient.database.LocalRocketModel
 import com.android.spacexclient.database.RocketDao
-import com.android.spacexclient.database.convertToDbModel
-import com.android.spacexclient.domain.DomainMapper
+import com.android.spacexclient.database.RocketDtoMapper
+import com.android.spacexclient.domain.RocketDomainMapper
 import com.android.spacexclient.domain.RocketModel
-import io.reactivex.rxjava3.core.Observable
+import com.android.spacexclient.presentation.utils.Query
+import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
+import java.io.IOException
 import javax.inject.Inject
 
 class RocketRepository @Inject constructor(
     private val rocketDao: RocketDao,
     private val rocketApi: RocketApi,
-    private val dataMapper: DomainMapper<List<LocalRocketModel>, List<RocketModel>>
+    private val rocketDomainMapper: RocketDomainMapper,
+    private val rocketDtoMapper: RocketDtoMapper,
 ) {
 
-    fun getRockets(): Observable<Result<List<RocketModel>>> {
-        return getRocketsFromDb().concatWith(getRocketsFromApi())
-            .distinctUntilChanged()
-            .map {
-                Result.success(dataMapper.map(it))
-            }.onErrorReturn { Result.failure(it) }
-    }
-
-    fun getActiveRockets(): Observable<Result<List<RocketModel>>> {
-        return rocketDao
-            .getActiveRockets()
-            .map { Result.success(dataMapper.map(it)) }
+    fun getRockets(query: Query): Single<Result<List<RocketModel>>> {
+        return getRocketsFromApi()
+            .map { list -> list.map { rocketDtoMapper.map(it) } }
+            .onErrorResumeNext { throwable ->
+                if (throwable is IOException) {
+                    return@onErrorResumeNext rocketDao.getRockets()
+                }
+                return@onErrorResumeNext Single.error(throwable)
+            }
+            .map { list -> list.filter { if (query.onlyActive) it.active else true } }
+            .map { list -> Result.success(list.map { rocketDomainMapper.map(it) }) }
             .onErrorReturn { Result.failure(it) }
     }
 
-    fun refreshRockets(): Observable<Result<List<RocketModel>>> {
-        return rocketApi.getRockets()
-            .map { convertToDbModel(it) }
-            .doOnNext {
-                rocketDao.insertAll(it).andThen(Observable.just(it))
-            }.map {
-                Result.success(dataMapper.map(it))
-            }.onErrorReturn { Result.failure(it) }
+    fun refreshRockets(): Single<Result<List<RocketModel>>> {
+        return refreshDatabase()
+            .map { list -> Result.success(list.map { rocketDomainMapper.map(it) }) }
+            .onErrorReturn { Result.failure(it) }
     }
 
-    private fun getRocketsFromApi(): Observable<List<LocalRocketModel>> {
-        return rocketApi.getRockets()
-            .map { convertToDbModel(it) }
-            .doOnNext {
-                rocketDao.insertAll(it).andThen(Observable.just(it))
-            }.onErrorResumeWith {
-                rocketDao.getRockets()
-            }
+    private fun refreshDatabase(): Single<List<LocalRocketModel>> {
+        return getRocketsFromApi()
+            .map { list -> list.map { rocketDtoMapper.map(it) } }
+            .doOnSuccess { list -> rocketDao.insertAll(list) }
     }
 
-    private fun getRocketsFromDb(): Observable<List<LocalRocketModel>> {
-        return rocketDao.getRockets().filter { it.isNotEmpty() }
+    private fun getRocketsFromApi(): Single<List<NetworkRocketModel>> {
+        return rocketApi.getRockets()
+
+    }
+
+    private fun getRocketsFromDb(): Single<List<LocalRocketModel>> {
+        return rocketDao.getRockets()
+            .subscribeOn(Schedulers.io())
     }
 
 

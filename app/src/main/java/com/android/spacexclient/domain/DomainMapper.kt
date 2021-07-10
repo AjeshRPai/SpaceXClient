@@ -6,21 +6,24 @@ interface DomainMapper<in T, out A> {
     fun map(model: T): A
 }
 
-object Mapper : DomainMapper<List<LocalRocketModel>, List<RocketModel>> {
-    override fun map(model: List<LocalRocketModel>): List<RocketModel> {
-        return model.map { convertToRocketModel(it) }
+class RocketDomainMapper : DomainMapper<LocalRocketModel, RocketModel> {
+
+    override fun map(model: LocalRocketModel): RocketModel {
+        return convertToRocketModel(model)
+    }
+
+    private fun convertToRocketModel(model: LocalRocketModel): RocketModel {
+        with(model) {
+            return RocketModel(
+                id = id,
+                name = name,
+                country = country,
+                active = active,
+                flickrImages = flickrImages,
+                engines = engines,
+                year = yearOfLaunch
+            )
+        }
     }
 }
 
-fun convertToRocketModel(model: LocalRocketModel): RocketModel {
-    with(model) {
-        return RocketModel(
-            id = id,
-            name = name,
-            country = country,
-            active = active,
-            flickrImages = flickrImages,
-            engines = engines
-        )
-    }
-}

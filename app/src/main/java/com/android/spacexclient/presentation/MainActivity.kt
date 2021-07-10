@@ -16,6 +16,7 @@ import com.android.spacexclient.SpaceXClientApplication
 import com.android.spacexclient.databinding.ActivityMainBinding
 import com.android.spacexclient.domain.RocketModel
 import com.android.spacexclient.presentation.utils.AppSharedPreferenceManager
+import com.android.spacexclient.presentation.utils.Query
 import com.android.spacexclient.presentation.utils.UIState
 import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
@@ -35,6 +36,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var sharedPreferences: SharedPreferences
 
+    private var query = Query()
+
+    private val filterUiStatusKey = "Filter Status"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +47,10 @@ class MainActivity : AppCompatActivity() {
         val root = binding.root
         setContentView(root)
 
-        sharedPreferences = (applicationContext as SpaceXClientApplication).component.getSharedPrefs()
+        sharedPreferences =
+            (applicationContext as SpaceXClientApplication).component.getSharedPrefs()
 
-        if(AppSharedPreferenceManager(sharedPreferences).getIsFirstTime())
+        if (AppSharedPreferenceManager(sharedPreferences).getIsFirstTime())
             startActivity(Intent(this, OnBoardingActivity::class.java))
 
 
@@ -73,10 +78,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         setUpList()
         setUpRefreshListener()
-        viewModel.getRockets()
     }
 
     private fun hideRefreshing() {
@@ -92,6 +95,7 @@ class MainActivity : AppCompatActivity() {
     private fun setUpRefreshListener() {
         binding.refreshRockets.setOnRefreshListener {
             viewModel.refreshRocketList()
+            query = Query.EMPTY
         }
     }
 
@@ -145,13 +149,24 @@ class MainActivity : AppCompatActivity() {
         activeSwitch.setActionView(R.layout.use_switch)
         val sw =
             menu.findItem(R.id.switch_action_bar).actionView.findViewById<View>(R.id.switch2) as SwitchCompat
-        sw.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked)
-                viewModel.getActiveRockets()
-            else
-                viewModel.getRockets()
 
+        sw.isChecked = query.onlyActive
+
+        sw.setOnCheckedChangeListener { _, isChecked ->
+            query.onlyActive = isChecked
+            viewModel.getRockets(query)
         }
         return true
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(filterUiStatusKey, query.onlyActive);
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        query.onlyActive = savedInstanceState.getBoolean(filterUiStatusKey)
     }
 }

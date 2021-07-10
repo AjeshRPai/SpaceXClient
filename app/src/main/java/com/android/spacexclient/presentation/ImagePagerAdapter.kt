@@ -18,10 +18,10 @@ class ImagePagerAdapter(private val items:List<String>): RecyclerView.Adapter<Ro
     }
     override fun onBindViewHolder(holder: RocketImageHolder, position: Int) {
         val item = items[position]
+        val imageView = holder.binding.rocketImage
         Glide.with(holder.itemView.context)
             .load(item)
-            .fitCenter()
-            .into(holder.binding.rocketImage);
+            .into(imageView)
     }
 
     override fun getItemCount(): Int {
