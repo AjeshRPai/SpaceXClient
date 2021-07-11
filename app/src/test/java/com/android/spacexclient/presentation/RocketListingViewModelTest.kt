@@ -7,25 +7,29 @@ import com.android.spacexclient.presentation.utils.UIState
 import com.jraska.livedata.TestObserver
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.schedulers.TestScheduler
+import io.reactivex.Single
+import io.reactivex.schedulers.TestScheduler
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.junit.runner.RunWith
+import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 
+@RunWith(MockitoJUnitRunner::class)
 class RocketListingViewModelTest {
 
     @get:Rule
-    val instantTaskTestRule: TestRule = InstantTaskExecutorRule()
+    val instantTaskTestRule: InstantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val getRocketsUseCaseImpl:GetRocketsUseCaseImpl = mock()
-    private val searchRocketsUseCaseImpl: SearchRocketsUseCaseImpl = mock()
+
     private val refreshRocketsUseCaseImpl: RefreshRocketsUseCaseImpl = mock()
 
     private val testSchedulerProvider = TestSchedulerProvider(TestScheduler())
 
-    private val sut = RocketListingViewModel(getRocketsUseCaseImpl,searchRocketsUseCaseImpl, refreshRocketsUseCaseImpl, testSchedulerProvider)
+    private val sut = RocketListingViewModel(getRocketsUseCaseImpl, refreshRocketsUseCaseImpl, testSchedulerProvider)
 
     private lateinit var listObserver: TestObserver<UIState<List<RocketModel>>>
 
@@ -35,14 +39,18 @@ class RocketListingViewModelTest {
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
+
         listObserver = TestObserver.test(sut.getAllRockets())
         refreshObserver = TestObserver.test(sut.getRefreshing())
 
     }
 
+    //https://stackoverflow.com/questions/52762418/livedata-unit-testing-error-when-using-postvalue-in-init-block
+
     @Test
     fun `when rockets are not fetched it should remain in the loading state`() {
-        whenever(getRocketsUseCaseImpl()).thenReturn(Observable.empty())
+        whenever(getRocketsUseCaseImpl(query)).thenReturn(Single.never())
 
         sut.getRockets()
         testSchedulerProvider.triggerActions()
@@ -53,7 +61,7 @@ class RocketListingViewModelTest {
     @Test
     fun `load rockets should show content state when rockets are retrieved`() {
         val models:List<RocketModel> = mock()
-        whenever(getRocketsUseCaseImpl()).thenReturn(Observable.just(Result.success(models)))
+        whenever(getRocketsUseCaseImpl(query)).thenReturn(Single.just(Result.success(models)))
 
         sut.getRockets()
         testSchedulerProvider.triggerActions()
@@ -66,7 +74,7 @@ class RocketListingViewModelTest {
         val error_message = "Some Error"
         val failure = Result.failure<List<RocketModel>>(Throwable(error_message))
 
-        whenever(getRocketsUseCaseImpl()).thenReturn(Observable.just(failure))
+        whenever(getRocketsUseCaseImpl(query)).thenReturn(Single.just(failure))
 
         sut.getRockets()
         testSchedulerProvider.triggerActions()
@@ -79,7 +87,7 @@ class RocketListingViewModelTest {
         val error_message = "Some Error"
         val failure = Result.failure<List<RocketModel>>(Throwable(error_message))
 
-        whenever(refreshRocketsUseCaseImpl()).thenReturn(Observable.just(failure))
+        whenever(refreshRocketsUseCaseImpl()).thenReturn(Single.just(failure))
 
         sut.refreshRocketList()
         testSchedulerProvider.triggerActions()
@@ -90,12 +98,26 @@ class RocketListingViewModelTest {
     @Test
     fun `refresh rockets should remain in loading state while fetching`() {
 
-        whenever(refreshRocketsUseCaseImpl()).thenReturn(Observable.empty())
+        whenever(refreshRocketsUseCaseImpl()).thenReturn(Single.never())
 
         sut.refreshRocketList()
         testSchedulerProvider.triggerActions()
 
         refreshObserver.assertValueHistory(UIState.Loading)
+    }
+
+    @Test
+    fun `rocket state should get content in success state while refreshing`() {
+        val models:List<RocketModel> = mock()
+
+        whenever(refreshRocketsUseCaseImpl()).thenReturn(Single.just(Result.success(models)))
+
+        sut.refreshRocketList()
+        testSchedulerProvider.triggerActions()
+
+        refreshObserver.assertValueHistory(UIState.Loading,UIState.Success(listOf()))
+
+        listObserver.assertValue(UIState.Success(models))
     }
 
 

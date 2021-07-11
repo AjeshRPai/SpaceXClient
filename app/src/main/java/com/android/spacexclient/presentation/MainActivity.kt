@@ -19,6 +19,7 @@ import com.android.spacexclient.presentation.utils.AppSharedPreferenceManager
 import com.android.spacexclient.presentation.utils.Query
 import com.android.spacexclient.presentation.utils.UIState
 import com.google.android.material.snackbar.Snackbar
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.getAllRockets().observe(this) {
             it?.let {
+                Timber.e("Get rockets state emitted ${it.toString()}")
                 when (it) {
                     is UIState.Success -> showData(it.data)
                     is UIState.Error -> showError(it.message)
@@ -80,6 +82,13 @@ class MainActivity : AppCompatActivity() {
 
         setUpList()
         setUpRefreshListener()
+        setUpRetryButton()
+    }
+
+    private fun setUpRetryButton() {
+        binding.button.setOnClickListener {
+            refresh()
+        }
     }
 
     private fun hideRefreshing() {
@@ -93,10 +102,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpRefreshListener() {
-        binding.refreshRockets.setOnRefreshListener {
-            viewModel.refreshRocketList()
-            query = Query.EMPTY
-        }
+        binding.refreshRockets.setOnRefreshListener { refresh() }
+    }
+
+    private fun refresh() {
+        viewModel.refreshRocketList()
+        query = Query.EMPTY
     }
 
     private fun showRefreshing() {
@@ -114,32 +125,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showLoading() {
-        binding.refreshRockets.isGone = true
+        binding.listData.isGone = true
+        binding.errorLayout.isGone = true
 
-        binding.progressBar.isVisible = true
-
-        binding.errorMessage.isGone = true
-        binding.button.isGone = true
+        binding.loading.isVisible = true
     }
 
     private fun showError(message: String) {
-        binding.refreshRockets.isGone = true
+        binding.listData.isGone = true
+        binding.loading.isGone = true
 
-        binding.progressBar.isGone = true
-
-        binding.errorMessage.isVisible = true
-        binding.button.isVisible = true
+        binding.errorLayout.isVisible = true
         binding.errorMessage.text = message
     }
 
     private fun showData(list: List<RocketModel>) {
-        binding.refreshRockets.isVisible = true
+        binding.loading.isGone = true
+        binding.errorLayout.isGone = true
 
-        binding.progressBar.isGone = true
-
-        binding.errorMessage.isGone = true
-        binding.button.isGone = true
-
+        binding.listData.isVisible = true
         adapter.submitList(list)
     }
 

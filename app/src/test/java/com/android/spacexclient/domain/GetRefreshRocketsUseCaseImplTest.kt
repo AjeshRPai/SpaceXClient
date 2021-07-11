@@ -4,7 +4,7 @@ package com.android.spacexclient.domain
 import com.android.spacexclient.RocketRepository
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.Single
 import org.junit.Test
 
 
@@ -19,7 +19,7 @@ class GetRefreshRocketsUseCaseImplTest {
         val models:List<RocketModel> = mock()
         val success = Result.success(models)
 
-        whenever(repository.refreshRockets()).thenReturn(Observable.just(success))
+        whenever(repository.refreshRockets()).thenReturn(Single.just(success))
         val actual = sut()
 
         actual.test()
@@ -31,7 +31,7 @@ class GetRefreshRocketsUseCaseImplTest {
         val throwable:Throwable = mock()
         val failure = Result.failure<List<RocketModel>>(throwable)
 
-        whenever(repository.refreshRockets()).thenReturn(Observable.just(failure))
+        whenever(repository.refreshRockets()).thenReturn(Single.just(failure))
         val actual = sut()
 
         actual.test()

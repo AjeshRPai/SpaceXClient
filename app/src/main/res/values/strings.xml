@@ -4,4 +4,5 @@
     <string name="engine_count">No of engines = %1$d </string>
     <string name="images_of_spacex_rocket">Rocket Images</string>
     <string name="shared_preference_file_key">com.spacexclient.applcation</string>
+    <string name="retry_button">Retry</string>
 </resources>

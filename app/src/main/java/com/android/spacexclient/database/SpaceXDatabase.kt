@@ -10,9 +10,6 @@ interface RocketDao {
     @Query("SELECT * FROM rockets")
     fun getRockets(): Single<List<LocalRocketModel>>
 
-    @Query("SELECT * FROM rockets where active = 1")
-    fun getActiveRockets(): List<LocalRocketModel>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(rockets: List<LocalRocketModel>):List<Long>
 

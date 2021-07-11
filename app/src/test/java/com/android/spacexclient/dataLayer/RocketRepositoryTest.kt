@@ -1,4 +1,3 @@
-/*
 package com.android.spacexclient.dataLayer
 
 import com.android.spacexclient.RocketRepository
@@ -7,15 +6,17 @@ import com.android.spacexclient.api.NetworkRocketModel
 import com.android.spacexclient.api.RocketApi
 import com.android.spacexclient.database.LocalRocketModel
 import com.android.spacexclient.database.RocketDao
-import com.android.spacexclient.database.convertToDbModel
-import com.android.spacexclient.domain.Mapper
+import com.android.spacexclient.database.RocketDtoMapper
+import com.android.spacexclient.domain.RocketDomainMapper
+import com.android.spacexclient.domain.RocketModel
+import com.android.spacexclient.presentation.utils.Query
 import com.nhaarman.mockitokotlin2.mock
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
+import com.nhaarman.mockitokotlin2.whenever
+import io.reactivex.Single
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
+import java.io.IOException
 
 
 @RunWith(MockitoJUnitRunner::class)
@@ -25,42 +26,31 @@ class RocketRepositoryTest {
 
     private val rocketApi: RocketApi = mock()
 
-    private val mapper: Mapper = mock()
+    private val domainMapper: RocketDomainMapper = mock()
 
-    private val rocketRepository = RocketRepository(rocketDao, rocketApi, mapper)
+    private val dtoMapper: RocketDtoMapper = mock()
+
+    private val sut = RocketRepository(rocketDao, rocketApi, domainMapper, dtoMapper)
 
     @Test
-    fun `if network is available and insertion is successful then should return movies`() {
-        // given
-        val engines = Engines(1)
-        val images = listOf("Image1Url", "Image2Url")
-        val rocket = NetworkRocketModel(false, "US", engines, images, "1234", "Spacex")
+    fun `if network is available then should return api response`() {
 
-        val apiResponse = arrayListOf(rocket)
-        val dbEntry = convertToDbModel(apiResponse)
-        val domainModels = Mapper.map(dbEntry)
+        val apiResponse = listOf(getNetworkModel())
+        val expectedResponse = Result.success(listOf(getDomainModel()))
 
-        val expectedResponse = Result.success(domainModels)
+        whenever(rocketApi.getRockets()).thenReturn(Single.just(apiResponse))
+        whenever(dtoMapper.map(getNetworkModel())).thenReturn(getDbModel())
+        whenever(domainMapper.map(getDbModel())).thenReturn(getDomainModel())
 
-        Mockito.`when`(rocketApi.getRockets())
-            .thenReturn(Observable.just(apiResponse))
-        Mockito.`when`(rocketDao.insertAll(dbEntry))
-            .thenReturn(Completable.complete())
-        Mockito.`when`(rocketDao.getRockets())
-            .thenReturn(Observable.just(dbEntry))
-        Mockito.`when`(mapper.map(dbEntry))
-            .thenReturn(domainModels)
-
-        print(expectedResponse)
         // when
-        rocketRepository
-            .getRockets()
+        sut.getRockets(Query.EMPTY)
             .test()
             .assertNoErrors()
             .assertValue {
                 it == expectedResponse
             }
-        //then it should return all the movies
+
+        //then it should return all the values from api response
 
     }
 
@@ -68,110 +58,165 @@ class RocketRepositoryTest {
     @Test
     fun `should support offline mode - if there are entries in the db then that should be emitted and network error should be ignored`() {
 
-        val images = listOf<String>()
-        val model = LocalRocketModel(id = "1234", "Spacex", "US", true, images, 1)
+        // given
+        val apiResponse = IOException("No Network")
+        val expectedResponse = Result.success(listOf(getDomainModel()))
 
-        val dbEntries = arrayListOf(model)
-        val domainModels = Mapper.map(dbEntries)
-
-        val networkError = Throwable("No Network")
-
-        Mockito.`when`(rocketApi.getRockets())
-            .thenReturn(Observable.error(networkError))
-        Mockito.`when`(rocketDao.getRockets())
-            .thenReturn(Observable.just(dbEntries))
-        Mockito.`when`(mapper.map(dbEntries))
-            .thenReturn(domainModels)
-
-        val expectedResponse = Result.success(domainModels)
+        whenever(rocketApi.getRockets()).thenReturn(Single.error(apiResponse))
+        whenever(rocketDao.getRockets()).thenReturn(Single.just(arrayListOf(getDbModel())))
+        whenever(domainMapper.map(getDbModel())).thenReturn(getDomainModel())
 
         // when
-        rocketRepository
-            .getRockets()
+        sut.getRockets(Query.EMPTY)
             .test()
-            .assertValueCount(1)
-            .assertValue{
+            .assertValue {
                 it == expectedResponse
             }
+    }
 
+    @Test
+    fun `should return Network error in case if its not Connectivity Issue`() {
+
+        // given
+        val apiResponse = Exception("Connectivity Issue")
+
+        whenever(rocketApi.getRockets()).thenReturn(Single.error(apiResponse))
+
+        // when
+        sut.getRockets(Query(true))
+            .test()
+            .assertValue {
+                print(it)
+                it.isFailure
+            }
+            .assertValue{
+                it.exceptionOrNull()!!.message ==
+                        apiResponse.message
+            }
 
     }
 
     @Test
-    fun `should refresh with updated items from network`() {
+    fun `should return No Result in case of No Data with Active Rocket State from Db`() {
 
-        val dbEntries = getAlreadyPresentDbEntries()
-        val domainModels = Mapper.map(dbEntries)
+        // given
+        val expectedMessage = "No Results"
+        val apiResponse = IOException("Connectivity Issue")
 
-        // new details
-        val apiResponse = getUpdatedApiResponse()
-
-        val dbEntries2 = convertToDbModel(apiResponse)
-        val domainModels2 = mapper.map(dbEntries2)
-
-        Mockito.`when`(rocketDao.getRockets())
-            .thenReturn(Observable.just(dbEntries))
-
-        Mockito.`when`(mapper.map(dbEntries))
-            .thenReturn(domainModels)
-
-        val expectedResponse = Result.success(listOf(domainModels))
-
-        Mockito.`when`(rocketApi.getRockets())
-            .thenReturn(Observable.just(apiResponse))
-
-        rocketRepository
-            .getRockets()
-            .test().assertValue {
-                print(it)
-                it.equals(expectedResponse)
-            }
-
-
-        Mockito.`when`(rocketDao.getRockets())
-            .thenReturn(Observable.just(dbEntries2))
-
-        Mockito.`when`(mapper.map(dbEntries2))
-            .thenReturn(domainModels2)
-
-
-        val expectedResponse2 = Result.success(listOf(domainModels2))
+        whenever(rocketApi.getRockets()).thenReturn(Single.error(apiResponse))
+        whenever(rocketDao.getRockets()).thenReturn(Single.just(listOf(getDbModel())))
 
         // when
-        rocketRepository
-            .getRockets()
+        sut.getRockets(Query(true))
             .test()
-            .assertValueAt(0)
-            {
+            .assertValue {
+                it.isFailure
+            }
+            .assertValue{
                 print(it)
-                it.equals(expectedResponse)
-            }.assertValueAt(1)
-            {
-                print(it)
-                it.equals(expectedResponse2)
+                it.exceptionOrNull()!!.message ==
+                        expectedMessage
             }
 
     }
 
-    private fun getAlreadyPresentDbEntries(): ArrayList<LocalRocketModel> {
-        val images = listOf<String>()
-        val model = LocalRocketModel(id = "1", "Spacex", "US", true, images, 1)
-        val model2 = LocalRocketModel(id = "2", "Spacex", "US", true, images, 1)
+    @Test
+    fun `should return No Result in case of No Data with Active Rocket State from API Response`() {
 
-        val dbEntries = arrayListOf(model, model2)
-        return dbEntries
+        // given
+
+        val expectedMessage = "No Results"
+        val apiResponse = listOf(getNetworkModel())
+
+        whenever(rocketApi.getRockets()).thenReturn(Single.just(apiResponse))
+        whenever(dtoMapper.map(getNetworkModel())).thenReturn(getDbModel())
+
+        // when
+        sut.getRockets(Query(true))
+            .test()
+            .assertValue {
+                it.isFailure
+            }
+            .assertValue{
+                it.exceptionOrNull()?.message == expectedMessage
+            }
+
     }
 
-    private fun getUpdatedApiResponse(): List<NetworkRocketModel> {
-        val engines = Engines(1)
-        val images2 = listOf("Image1Url", "Image2Url")
-        val rocket1 = NetworkRocketModel(false, "US", engines, images2, "1", "Spacex")
-        val rocket2 = NetworkRocketModel(false, "US", engines, images2, "2", "Spacex")
-        val rocket3 = NetworkRocketModel(false, "US", engines, images2, "3", "Spacex")
-        val rocket4 = NetworkRocketModel(false, "US", engines, images2, "4", "Spacex")
+    @Test
+    fun `should return updated results only when refresh is called`() {
 
-        val apiResponse = listOf(rocket1, rocket2, rocket3, rocket4)
-        return apiResponse
+        //given
+        val apiResponse = listOf(getNetworkModel())
+        val expectedResponse = Result.success(listOf(getDomainModel()))
+
+        whenever(rocketApi.getRockets()).thenReturn(Single.just(apiResponse))
+        whenever(dtoMapper.map(getNetworkModel())).thenReturn(getDbModel())
+        whenever(domainMapper.map(getDbModel())).thenReturn(getDomainModel())
+
+        // when
+        sut.refreshRockets()
+            .test()
+            .assertValue {
+                it == expectedResponse
+            }
+
     }
 
-}*/
+    @Test
+    fun `should return error when refresh fails`() {
+
+        //given
+        val apiResponse = IOException("No Network Error")
+
+        whenever(rocketApi.getRockets()).thenReturn(Single.error(apiResponse))
+
+        // when
+        sut.refreshRockets()
+            .test()
+            .assertValue {
+                it.isFailure
+            }.assertValue {
+                it.exceptionOrNull()?.message == apiResponse.message
+            }
+
+    }
+
+
+    private fun getDbModel(): LocalRocketModel {
+        return LocalRocketModel(
+            "1",
+            "Space x",
+            "US",
+            false,
+            1,
+            listOf("Image1Url", "Image2Url"),
+            "2019"
+        )
+    }
+
+    private fun getNetworkModel(): NetworkRocketModel {
+        return NetworkRocketModel(
+            "1",
+            "Space x",
+            "US",
+            false,
+            Engines(1),
+            listOf("Image1Url", "Image2Url"),
+            "2019-06-23"
+        )
+    }
+
+    private fun getDomainModel(): RocketModel {
+        return RocketModel(
+            "1",
+            "Space x",
+            "US",
+            false,
+            listOf("Image1Url", "Image2Url"),
+            1,
+            "2019"
+        )
+    }
+
+}
