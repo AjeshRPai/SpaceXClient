@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="filter_header">"Filter Items by "</string>
+    <string name="filter_check_box_active">Fetch Only Active Rockets</string>
+</resources>

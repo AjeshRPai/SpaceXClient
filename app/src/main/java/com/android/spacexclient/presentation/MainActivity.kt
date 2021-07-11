@@ -3,21 +3,20 @@ package com.android.spacexclient.presentation
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.Menu
-import android.view.View
+import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.spacexclient.R
 import com.android.spacexclient.SpaceXClientApplication
 import com.android.spacexclient.databinding.ActivityMainBinding
+import com.android.spacexclient.databinding.BottomSheetDialogBinding
 import com.android.spacexclient.domain.RocketModel
 import com.android.spacexclient.presentation.utils.AppSharedPreferenceManager
 import com.android.spacexclient.presentation.utils.Query
 import com.android.spacexclient.presentation.utils.UIState
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 import javax.inject.Inject
@@ -30,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val adapter = RocketAdapter()
+
+    private val linearLayoutManager = LinearLayoutManager(this)
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -83,6 +84,13 @@ class MainActivity : AppCompatActivity() {
         setUpList()
         setUpRefreshListener()
         setUpRetryButton()
+        setUpFilterButton()
+    }
+
+    private fun setUpFilterButton() {
+        binding.floatingActionButton.setOnClickListener {
+            showFilterDialog(query.onlyActive)
+        }
     }
 
     private fun setUpRetryButton() {
@@ -98,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpList() {
         binding.rocketList.adapter = adapter
-        binding.rocketList.layoutManager = LinearLayoutManager(this)
+        binding.rocketList.layoutManager = linearLayoutManager
     }
 
     private fun setUpRefreshListener() {
@@ -147,20 +155,11 @@ class MainActivity : AppCompatActivity() {
         adapter.submitList(list)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        val activeSwitch = menu.findItem(R.id.switch_action_bar)
-        activeSwitch.setActionView(R.layout.use_switch)
-        val sw =
-            menu.findItem(R.id.switch_action_bar).actionView.findViewById<View>(R.id.switch2) as SwitchCompat
-
-        sw.isChecked = query.onlyActive
-
-        sw.setOnCheckedChangeListener { _, isChecked ->
-            query.onlyActive = isChecked
-            viewModel.getRockets(query)
-        }
-        return true
+    private fun applyFilter(onlyActive: Boolean) {
+        if(query.onlyActive == onlyActive)
+            return
+        else query.onlyActive = onlyActive
+        viewModel.getRockets(query)
     }
 
 
@@ -173,4 +172,22 @@ class MainActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         query.onlyActive = savedInstanceState.getBoolean(filterUiStatusKey)
     }
+
+    private fun showFilterDialog(onlyActive: Boolean) {
+        val bottomSheetDialog = BottomSheetDialog(this)
+
+        val dialogBinding = BottomSheetDialogBinding
+            .inflate(LayoutInflater.from(this))
+        bottomSheetDialog.setContentView(dialogBinding.root)
+
+        dialogBinding.checkBox.isChecked = onlyActive
+        dialogBinding.applyFilterButton
+            .setOnClickListener {
+                applyFilter(dialogBinding.checkBox.isChecked)
+                bottomSheetDialog.dismiss()
+            }
+
+        bottomSheetDialog.show()
+    }
+
 }

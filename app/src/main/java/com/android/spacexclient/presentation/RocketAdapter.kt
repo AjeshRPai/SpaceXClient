@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.spacexclient.R
 import com.android.spacexclient.databinding.RocketListItemBinding
 import com.android.spacexclient.domain.RocketModel
-import com.bumptech.glide.Glide
 import com.google.android.material.tabs.TabLayoutMediator
 import timber.log.Timber
 
@@ -38,7 +37,7 @@ class RocketAdapter() : ListAdapter<RocketModel, RocketViewHolder>(DiffCallback(
         }
 
         binding.rocketName.text = currentItem.name
-        binding.country.text = currentItem.country
+        binding.country.text = holder.itemView.resources.getString(R.string.rocket_country, currentItem.country)
         binding.engines.text =
             holder.itemView.resources.getString(R.string.engine_count, currentItem.engines)
     }

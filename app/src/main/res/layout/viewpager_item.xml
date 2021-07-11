@@ -8,16 +8,16 @@
 
     <ImageView
         android:id="@+id/rocketImage"
-        android:layout_width="wrap_content"
-        android:paddingEnd="16dp"
+        android:layout_width="0dp"
         android:layout_height="240dp"
-        android:adjustViewBounds="false"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/images_of_spacex_rocket"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.51"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/backgrounds/scenic"
-        android:contentDescription="@string/images_of_spacex_rocket"
-        tools:ignore="RtlCompat" />
+        tools:ignore="RtlCompat"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
