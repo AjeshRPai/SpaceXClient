@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">SpaceXClient</string>
-    <string name="welcome_messages">Hello how are you, Lets go to Mars</string>
+    <string name="welcome_messages">Welcome, Are You Ready for the Ride? </string>
     <string name="engine_count">No of engines : %1$d </string>
     <string name="rocket_country">Country : %1$s </string>
     <string name="images_of_spacex_rocket">Rocket Images</string>
@@ -10,4 +10,6 @@
     <string name="reset">Reset</string>
     <string name="filter_header">Filter Items by</string>
     <string name="filter_check_box_active">Fetch Only Active Rockets</string>
+    <string name="welcome_button">Lets Take Off</string>
+    M
 </resources>

@@ -1,7 +1,6 @@
 package com.android.spacexclient.dataLayer
 
 import com.android.spacexclient.RocketRepository
-import com.android.spacexclient.api.Engines
 import com.android.spacexclient.api.NetworkRocketModel
 import com.android.spacexclient.api.RocketApi
 import com.android.spacexclient.database.LocalRocketModel
@@ -201,7 +200,7 @@ class RocketRepositoryTest {
             "Space x",
             "US",
             false,
-            Engines(1),
+            NetworkRocketModel.Engines(1),
             listOf("Image1Url", "Image2Url"),
             "2019-06-23"
         )

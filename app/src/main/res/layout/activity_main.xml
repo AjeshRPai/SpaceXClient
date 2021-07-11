@@ -81,7 +81,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/loading"
         android:visibility="gone"
-        app:constraint_referenced_ids="loading" />
+        app:constraint_referenced_ids="progressBar" />
 
 
     <androidx.constraintlayout.widget.Group

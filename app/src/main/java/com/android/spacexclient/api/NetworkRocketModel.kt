@@ -17,9 +17,9 @@ data class NetworkRocketModel(
     val flickrImages: List<String>,
     @SerializedName("first_flight")
     val first_flight:String
-)
-
-data class Engines(
-    @SerializedName("number")
-    val number: Int
-)
+) {
+    data class Engines(
+        @SerializedName("number")
+        val number: Int
+    )
+}

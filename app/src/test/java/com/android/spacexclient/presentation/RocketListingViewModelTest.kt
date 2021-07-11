@@ -36,7 +36,6 @@ class RocketListingViewModelTest {
 
     private val query = Query()
 
-    //https://stackoverflow.com/questions/52762418/livedata-unit-testing-error-when-using-postvalue-in-init-block
 
     @Test
     fun `when rockets are not fetched it should remain in the loading state`() {

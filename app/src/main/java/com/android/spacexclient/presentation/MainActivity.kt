@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -35,9 +36,6 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    @Inject
-    lateinit var sharedPreferences: SharedPreferences
-
     private var query = Query()
 
     private val filterUiStatusKey = "Filter Status"
@@ -48,13 +46,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val root = binding.root
         setContentView(root)
-
-        sharedPreferences =
-            (applicationContext as SpaceXClientApplication).component.getSharedPrefs()
-
-        if (AppSharedPreferenceManager(sharedPreferences).getIsFirstTime())
-            startActivity(Intent(this, OnBoardingActivity::class.java))
-
 
         (applicationContext as SpaceXClientApplication).component.inject(this)
 

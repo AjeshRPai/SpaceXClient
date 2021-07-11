@@ -1,7 +1,6 @@
 package com.android.spacexclient.database
 
 import androidx.room.*
-import io.reactivex.Observable
 import io.reactivex.Single
 
 @Dao

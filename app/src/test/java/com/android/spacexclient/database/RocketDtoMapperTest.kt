@@ -1,6 +1,5 @@
 package com.android.spacexclient.database
 
-import com.android.spacexclient.api.Engines
 import com.android.spacexclient.api.NetworkRocketModel
 import org.junit.Assert
 import org.junit.Test
@@ -15,7 +14,7 @@ class RocketDtoMapperTest
            "Space x",
            "US",
            false,
-           Engines(1),
+           NetworkRocketModel.Engines(1),
            listOf("Image1Url", "Image2Url"),
            "2019-06-23")
 
@@ -37,7 +36,7 @@ class RocketDtoMapperTest
             "Space x",
             "US",
             false,
-            Engines(1),
+            NetworkRocketModel.Engines(1),
             listOf("Image1Url", "Image2Url"),
             invalidDate)
 
