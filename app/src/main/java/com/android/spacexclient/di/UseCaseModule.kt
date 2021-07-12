@@ -1,8 +1,8 @@
 package com.android.spacexclient.di
 
-import com.android.spacexclient.RocketRepository
-import com.android.spacexclient.domain.GetRocketsUseCaseImpl
-import com.android.spacexclient.domain.RefreshRocketsUseCaseImpl
+import com.android.spacexclient.data.repository.RocketRepository
+import com.android.spacexclient.domain.usecase.rocket.GetRocketsUseCaseImpl
+import com.android.spacexclient.domain.usecase.rocket.RefreshRocketsUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

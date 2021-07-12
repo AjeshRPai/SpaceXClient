@@ -2,7 +2,7 @@ package com.android.spacexclient.di
 
 import android.app.Application
 import android.content.SharedPreferences
-import com.android.spacexclient.presentation.MainActivity
+import com.android.spacexclient.presentation.view.MainActivity
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton

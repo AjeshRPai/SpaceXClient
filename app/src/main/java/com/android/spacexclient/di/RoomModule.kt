@@ -2,8 +2,8 @@ package com.android.spacexclient.di
 
 import android.app.Application
 import androidx.room.Room
-import com.android.spacexclient.database.RocketDao
-import com.android.spacexclient.database.SpaceXDatabase
+import com.android.spacexclient.data.database.RocketDao
+import com.android.spacexclient.data.database.SpaceXDatabase
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

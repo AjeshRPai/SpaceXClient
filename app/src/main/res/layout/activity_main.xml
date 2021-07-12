@@ -53,7 +53,7 @@
             android:paddingBottom="32dp"
             android:clipToPadding="false"
             android:layoutAnimation="@anim/layout_animation_fall_down"
-            tools:context="com.android.spacexclient.presentation.MainActivity"
+            tools:context="com.android.spacexclient.presentation.view.MainActivity"
             tools:listitem="@layout/activity_main" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -1,6 +1,6 @@
 package com.android.spacexclient.di
 
-import com.android.spacexclient.api.RocketApi
+import com.android.spacexclient.data.api.RocketApi
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
