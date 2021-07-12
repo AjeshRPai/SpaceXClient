@@ -1,20 +1,18 @@
 package com.android.spacexclient.presentation
 
-import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.android.spacexclient.SpaceXClientApplication
 import com.android.spacexclient.databinding.ActivityMainBinding
 import com.android.spacexclient.databinding.BottomSheetDialogBinding
 import com.android.spacexclient.domain.RocketModel
-import com.android.spacexclient.presentation.utils.AppSharedPreferenceManager
 import com.android.spacexclient.presentation.utils.Query
 import com.android.spacexclient.presentation.utils.UIState
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -86,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpRetryButton() {
         binding.button.setOnClickListener {
-            refresh()
+            viewModel.getRockets(query)
         }
     }
 
@@ -144,6 +142,18 @@ class MainActivity : AppCompatActivity() {
 
         binding.listData.isVisible = true
         adapter.submitList(list)
+        runLayoutAnimation()
+    }
+
+    private fun runLayoutAnimation() {
+        adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                if (positionStart == 0 && positionStart == linearLayoutManager.findFirstCompletelyVisibleItemPosition()) {
+                    linearLayoutManager.scrollToPosition(0)
+                }
+            }
+        })
     }
 
     private fun applyFilter(onlyActive: Boolean) {
