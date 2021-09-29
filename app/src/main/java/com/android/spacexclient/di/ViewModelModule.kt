@@ -6,6 +6,7 @@ import com.android.spacexclient.presentation.viewmodel.RocketListingViewModel
 import dagger.Binds
 import dagger.MapKey
 import dagger.Module
+import dagger.hilt.InstallIn
 import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import javax.inject.Provider
@@ -23,6 +24,7 @@ class ViewModelFactory @Inject constructor(private val viewModels: MutableMap<Cl
 annotation class ViewModelKey(val value: KClass<out ViewModel>)
 
 @Module
+@dagger.hilt.InstallIn(dagger.hilt.android.components.ViewModelComponent::class)
 abstract class ViewModelModule {
 
     @Binds

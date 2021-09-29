@@ -6,10 +6,12 @@ import com.android.spacexclient.data.database.RocketDao
 import com.android.spacexclient.data.database.SpaceXDatabase
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
 import javax.inject.Singleton
 
 
 @Module
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
 class RoomModule {
 
     private lateinit var database: SpaceXDatabase

@@ -2,38 +2,34 @@ package com.android.spacexclient.presentation.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
-import com.android.spacexclient.SpaceXClientApplication
 import com.android.spacexclient.databinding.ActivityMainBinding
 import com.android.spacexclient.databinding.BottomSheetDialogBinding
+import com.android.spacexclient.domain.model.Query
 import com.android.spacexclient.domain.model.RocketModel
 import com.android.spacexclient.presentation.RocketAdapter
-import com.android.spacexclient.presentation.viewmodel.RocketListingViewModel
-import com.android.spacexclient.domain.model.Query
 import com.android.spacexclient.presentation.utils.UIState
+import com.android.spacexclient.presentation.viewmodel.RocketListingViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
-import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: RocketListingViewModel
+    private val viewModel: RocketListingViewModel by viewModels()
 
     private lateinit var binding: ActivityMainBinding
 
     private val adapter = RocketAdapter()
 
     private val linearLayoutManager = LinearLayoutManager(this)
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private var query = Query()
 
@@ -45,10 +41,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val root = binding.root
         setContentView(root)
-
-        (applicationContext as SpaceXClientApplication).component.inject(this)
-
-        viewModel = ViewModelProvider(this, viewModelFactory)[RocketListingViewModel::class.java]
 
         viewModel.getAllRockets().observe(this) {
             it?.let {

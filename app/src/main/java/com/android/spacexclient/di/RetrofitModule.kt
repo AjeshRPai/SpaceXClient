@@ -11,6 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
 class RetrofitModule {
 
     @Singleton

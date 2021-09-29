@@ -14,8 +14,7 @@ class OnBoardingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val sharedPreferences =
-            (applicationContext as SpaceXClientApplication).component.getSharedPrefs()
+        val sharedPreferences = getSharedPreferences("app", Context.MODE_PRIVATE)
 
         if (!AppSharedPreferenceManager(sharedPreferences).getIsFirstTime())
             startActivity(Intent(this, MainActivity::class.java))

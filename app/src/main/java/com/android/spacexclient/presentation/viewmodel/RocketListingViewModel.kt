@@ -12,6 +12,7 @@ import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
 import javax.inject.Inject
 
+@dagger.hilt.android.lifecycle.HiltViewModel
 class RocketListingViewModel @Inject constructor(
     val getRocketsUseCaseImpl: GetRocketsUseCaseImpl,
     val refreshRocketsUseCaseImpl: RefreshRocketsUseCaseImpl,

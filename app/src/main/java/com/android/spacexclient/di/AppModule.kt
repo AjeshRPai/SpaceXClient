@@ -10,6 +10,7 @@ import javax.inject.Singleton
 
 
 @Module
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
 class AppModule() {
 
     @Provides
