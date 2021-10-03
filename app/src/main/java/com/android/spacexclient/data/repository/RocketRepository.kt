@@ -8,8 +8,7 @@ import com.android.spacexclient.data.database.model.LocalRocketModel
 import com.android.spacexclient.domain.mapper.RocketDomainMapper
 import com.android.spacexclient.domain.model.RocketModel
 import com.android.spacexclient.domain.model.Query
-import io.reactivex.Single
-import java.io.IOException
+import java.lang.NullPointerException
 import javax.inject.Inject
 
 class RocketRepository @Inject constructor(
@@ -19,46 +18,54 @@ class RocketRepository @Inject constructor(
     private val rocketDtoMapper: RocketDtoMapper,
 ) {
 
-    fun getRockets(query: Query): Single<Result<List<RocketModel>>> {
-        return refreshDatabase()
-            .onErrorResumeNext { throwable ->
-                if (throwable is IOException) {
-                    return@onErrorResumeNext getRocketsFromDb()
-                }
-                return@onErrorResumeNext Single.error(throwable)
+    suspend fun getRockets(query: Query): Result<List<RocketModel>> {
+        var rocketRefreshResponse = refreshRocketList()
+        if (rocketRefreshResponse.isSuccess &&
+            !rocketRefreshResponse.getOrNull().isNullOrEmpty()
+        ) {
+            val rocketList = rocketRefreshResponse.getOrNull()
+            val filtered = rocketList?.filter { if (query.onlyActive) it.active else true }
+            if (filtered.isNullOrEmpty()) {
+                return Result.failure(NullPointerException())
             }
-            .map { list -> list.filter { if (query.onlyActive) it.active else true } }
-            .map { list ->
-                if (list.isNotEmpty()) mapToDomainResult(list)
-                else Result.failure(Throwable("No Results"))
+            return Result.success(filtered)
+        } else {
+            val list = getRocketsFromDb()
+            return if (list.isEmpty()) {
+                Result.failure(NullPointerException())
+            } else {
+                Result.success(mapToDomainModel(list))
             }
-            .onErrorReturn { Result.failure(it) }
+        }
     }
 
-    fun refreshRockets(): Single<Result<List<RocketModel>>> {
-        return refreshDatabase()
-            .map { list -> mapToDomainResult(list) }
-            .onErrorReturn { Result.failure(it) }
+    suspend fun refreshRocketList(): Result<List<RocketModel>> {
+        val apiResponse = getRocketsFromApi()
+        if (apiResponse.isNotEmpty()) {
+            refreshDatabase(apiResponse)
+            val dbResponse = getRocketsFromDb()
+            return Result.success(mapToDomainModel(dbResponse))
+        }
+        return Result.failure(NullPointerException())
     }
 
-    private fun refreshDatabase(): Single<List<LocalRocketModel>> {
-        return getRocketsFromApi()
-            .map { list -> mapToLocalModel(list) }
-            .doOnSuccess { list -> rocketDao.insertAll(list) }
+
+    private suspend fun refreshDatabase(list: List<NetworkRocketModel>) {
+        val localList = mapToLocalModel(list)
+        rocketDao.insertAll(localList)
     }
 
     private fun mapToLocalModel(list: List<NetworkRocketModel>): List<LocalRocketModel> =
         list.map { rocketDtoMapper.map(it) }
 
-    private fun mapToDomainResult(list: List<LocalRocketModel>): Result<List<RocketModel>> =
-        Result.success(list.map { rocketDomainMapper.map(it) })
+    private fun mapToDomainModel(list: List<LocalRocketModel>): List<RocketModel> =
+        list.map { rocketDomainMapper.map(it) }
 
-
-    private fun getRocketsFromApi(): Single<List<NetworkRocketModel>> {
+    private suspend fun getRocketsFromApi(): List<NetworkRocketModel> {
         return rocketApi.getRockets()
     }
 
-    private fun getRocketsFromDb(): Single<List<LocalRocketModel>> {
+    private suspend fun getRocketsFromDb(): List<LocalRocketModel> {
         return rocketDao.getRockets()
     }
 

@@ -18,27 +18,27 @@ class GetRocketsUseCaseImplTest {
 
     private val query: Query = mock()
 
-    @Test
-    fun `invoke should return repository result success`() {
-        val models:List<RocketModel> = mock()
-        val success = Result.success(models)
-
-        whenever(repository.getRockets(query)).thenReturn(Single.just(success))
-        val actual = sut(query)
-
-        actual.test()
-            .assertValue { it.equals(success) }
-    }
-
-    @Test
-    fun `invoke should return repository result failure`() {
-        val throwable:Throwable = mock()
-        val failure = Result.failure<List<RocketModel>>(throwable)
-
-        whenever(repository.getRockets(query)).thenReturn(Single.just(failure))
-        val actual = sut(query)
-
-        actual.test()
-            .assertValue { it.equals(failure) }
-    }
+//    @Test
+//    fun `invoke should return repository result success`() {
+//        val models:List<RocketModel> = mock()
+//        val success = Result.success(models)
+//
+//        whenever(repository.getRockets(query)).thenReturn(Single.just(success))
+//        val actual = sut(query)
+//
+//        actual.test()
+//            .assertValue { it.equals(success) }
+//    }
+//
+//    @Test
+//    fun `invoke should return repository result failure`() {
+//        val throwable:Throwable = mock()
+//        val failure = Result.failure<List<RocketModel>>(throwable)
+//
+//        whenever(repository.getRockets(query)).thenReturn(Single.just(failure))
+//        val actual = sut(query)
+//
+//        actual.test()
+//            .assertValue { it.equals(failure) }
+//    }
 }

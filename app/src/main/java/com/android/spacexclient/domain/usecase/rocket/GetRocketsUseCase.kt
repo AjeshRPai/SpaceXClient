@@ -5,7 +5,7 @@ import com.android.spacexclient.domain.model.Query
 import io.reactivex.Single
 
 interface GetRocketsUseCase {
-    operator fun invoke(query: Query): Single<Result<List<RocketModel>>>
+    suspend operator fun invoke(query: Query): Result<List<RocketModel>>
 }
 
 

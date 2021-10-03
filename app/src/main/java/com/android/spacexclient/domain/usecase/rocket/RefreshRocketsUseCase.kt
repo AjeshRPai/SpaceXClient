@@ -4,5 +4,5 @@ import com.android.spacexclient.domain.model.RocketModel
 import io.reactivex.Single
 
 interface RefreshRocketsUseCase {
-    operator fun invoke(): Single<Result<List<RocketModel>>>
+    suspend operator fun invoke(): Result<List<RocketModel>>
 }

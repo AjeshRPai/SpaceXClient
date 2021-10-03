@@ -2,6 +2,7 @@ package com.android.spacexclient.presentation.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.android.spacexclient.domain.model.RocketModel
 import com.android.spacexclient.domain.usecase.rocket.GetRocketsUseCaseImpl
 import com.android.spacexclient.domain.usecase.rocket.RefreshRocketsUseCaseImpl
@@ -9,6 +10,7 @@ import com.android.spacexclient.domain.model.Query
 import com.android.spacexclient.presentation.utils.SchedulerProvider
 import com.android.spacexclient.presentation.utils.UIState
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -30,7 +32,6 @@ class RocketListingViewModel @Inject constructor(
         return refreshRockets
     }
 
-    private val compositeDisposable = CompositeDisposable()
 
     init {
         getRockets()
@@ -39,14 +40,13 @@ class RocketListingViewModel @Inject constructor(
     fun getRockets(query: Query = Query.EMPTY) {
         Timber.i("Get rockets called with $query")
         listOfRockets.postValue(UIState.Loading)
-        val disposable = getRocketsUseCaseImpl(query)
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe(
-                { handleSuccess(it) },
-                { handleFailure(it) }
-            )
-        compositeDisposable.add(disposable)
+        viewModelScope.launch {
+            val rockets = getRocketsUseCaseImpl(query)
+            when {
+                rockets.isSuccess -> handleSuccess(rockets)
+                rockets.isFailure -> handleFailure(rockets.exceptionOrNull()?:UnknownError())
+            }
+        }
     }
 
     private fun handleSuccess(it: Result<List<RocketModel>>) {
@@ -65,14 +65,13 @@ class RocketListingViewModel @Inject constructor(
     fun refreshRocketList() {
         Timber.i("Refresh Rocket List Called")
         refreshRockets.postValue(UIState.Loading)
-        val disposable = refreshRocketsUseCaseImpl()
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe(
-                { handleRefreshSuccess(it) },
-                { handleRefreshFailure(it) }
-            )
-        compositeDisposable.add(disposable)
+        viewModelScope.launch {
+            val rockets = refreshRocketsUseCaseImpl()
+            when {
+                rockets.isSuccess -> handleRefreshSuccess(rockets)
+                rockets.isFailure -> handleRefreshFailure(rockets.exceptionOrNull()?:UnknownError())
+            }
+        }
     }
 
     private fun handleRefreshFailure(it: Throwable?) {
@@ -94,7 +93,6 @@ class RocketListingViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        compositeDisposable.clear()
     }
 
 }

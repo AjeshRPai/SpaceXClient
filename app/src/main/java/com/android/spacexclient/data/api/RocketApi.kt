@@ -7,6 +7,6 @@ import retrofit2.http.GET
 interface RocketApi {
 
     @GET("v4/rockets")
-    fun getRockets(): Single<List<NetworkRocketModel>>
+    suspend fun getRockets(): List<NetworkRocketModel>
 
 }

@@ -8,7 +8,7 @@ import javax.inject.Inject
 class RefreshRocketsUseCaseImpl @Inject constructor(
     private val repository: RocketRepository,
 ): RefreshRocketsUseCase {
-    override fun invoke(): Single<Result<List<RocketModel>>> {
-        return repository.refreshRockets()
+    override suspend fun invoke(): Result<List<RocketModel>> {
+        return repository.refreshRocketList()
     }
 }

@@ -9,7 +9,7 @@ import javax.inject.Inject
 class GetRocketsUseCaseImpl @Inject constructor(
     private val repository: RocketRepository
 ): GetRocketsUseCase {
-    override fun invoke(query: Query): Single<Result<List<RocketModel>>> {
+    override suspend fun invoke(query: Query): Result<List<RocketModel>> {
         return repository.getRockets(query)
     }
 }

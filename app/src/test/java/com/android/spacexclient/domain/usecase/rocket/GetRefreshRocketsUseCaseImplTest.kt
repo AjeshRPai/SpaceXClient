@@ -20,7 +20,7 @@ class GetRefreshRocketsUseCaseImplTest {
         val models:List<RocketModel> = mock()
         val success = Result.success(models)
 
-        whenever(repository.refreshRockets()).thenReturn(Single.just(success))
+        whenever(repository.refreshRocketList()).thenReturn(Single.just(success))
         val actual = sut()
 
         actual.test()
@@ -32,7 +32,7 @@ class GetRefreshRocketsUseCaseImplTest {
         val throwable:Throwable = mock()
         val failure = Result.failure<List<RocketModel>>(throwable)
 
-        whenever(repository.refreshRockets()).thenReturn(Single.just(failure))
+        whenever(repository.refreshRocketList()).thenReturn(Single.just(failure))
         val actual = sut()
 
         actual.test()
